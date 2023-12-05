@@ -5,6 +5,8 @@ import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm.jsx';
 import Rank from './components/Rank/Rank.jsx';
 import ParticlesComponent from './components/ParticlesComponent/ParticlesComponent.jsx';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition.jsx';
+import Signin from './components/ Signin/Signin.jsx';
+import Register from './components/Register/Register.jsx';
 import './App.css';
 
 
@@ -58,7 +60,9 @@ class App extends Component {
     this.state = {
       input: '',
       imageUrl: '',
-      box: {}
+      box: {},
+      route: 'signin',
+      isSignedIn: false,
     }
   }
 
@@ -106,18 +110,52 @@ class App extends Component {
     //   }
     // )
 
+  onRouteChange = (route) => {
+    if (route === 'signout') {
+      this.setState({isSignedIn: false})
+    } else if (route === 'home') {
+      this.setState({isSignedIn: true})
+    }
+    this.setState({route: route});
+  }
 
   render() {
+    const { isSignedIn, imageUrl, route, box } = this.state;
     return (
-      <div className='App'>
-        <Navigation />
-        <Logo />
-        <Rank />
-        <ImageLinkForm onInputChange={this.handleInputChange} onButtonSubmit={this.handleSubmit}/>
-        <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl}/>
+      <div className="App">
         <ParticlesComponent />
+        <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange} />
+        { route === 'home'
+          ? <div>
+              <Logo />
+              <Rank
+                // name={this.state.user.name}
+                // entries={this.state.user.entries}
+              />
+              <ImageLinkForm
+                onInputChange={this.handleInputChange}
+                onButtonSubmit={this.handleSubmit}
+              />
+              <FaceRecognition box={box} imageUrl={imageUrl}/>
+            </div>
+          : (
+             route === 'signin'
+             ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+             : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
+            )
+        }
       </div>
-    )
+    );
+    // return (
+    //   <div className='App'>
+    //     <Navigation />
+    //     <Logo />
+    //     <Rank />
+    //     <ImageLinkForm onInputChange={this.handleInputChange} onButtonSubmit={this.handleSubmit}/>
+    //     <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl}/>
+    //     <ParticlesComponent />
+    //   </div>
+    // )
   }
 }
 
