@@ -63,7 +63,25 @@ class App extends Component {
       box: {},
       route: 'signin',
       isSignedIn: false,
+      user: {
+        id: '',
+        name: '',
+        email: '',
+        entries: 0,
+        joined: '',
+      }
     }
+  }
+
+  onLoadUser = (data) => {
+    this.setState(Object.assign(this.state.user, {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      entries: data.entries,
+      joined: data.joined,
+    }))
+    console.log(this.state.user);
   }
 
   handleInputChange = (event) => {
@@ -90,11 +108,28 @@ class App extends Component {
 
   handleSubmit = () => {
     console.log('click');
-    this.setState({ imageUrl: this.state.input })
+    this.setState({ 
+      imageUrl: this.state.input,
+     })
     // code to send the input through api key to a service
     fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", returnClarifaiRequestOptions(this.state.input))
-    .then(response => response.json()) // important line, without it I would be able to access box coordinatinates
-    .then(response => this.setBoxArea(this.getCoordinates(response)))
+    .then(response => response.json()) // important line, without it I wouldn't be able to access box coordinatinates
+    .then(response => {
+      if (response) {
+        fetch('http://localhost:3000/image', {
+          method: 'put',
+          headers: { 'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            id: this.state.user.id
+          })
+        })
+          .then(response => response.json())
+          .then(count => {
+            this.setState(Object.assign(this.state.user, { entries: count }))
+          })
+      }
+      this.setBoxArea(this.getCoordinates(response))
+    })
     .catch(err => console.log(err));
   }
 
@@ -121,42 +156,39 @@ class App extends Component {
 
   render() {
     const { isSignedIn, imageUrl, route, box } = this.state;
+  
+    let displayContent;
+    if (route === 'home') {
+      displayContent = (
+        <div>
+          <Logo />
+          <Rank
+            name={this.state.user.name}
+            entries={this.state.user.entries}
+          />
+          <ImageLinkForm
+            onInputChange={this.handleInputChange}
+            onButtonSubmit={this.handleSubmit}
+          />
+          <FaceRecognition box={box} imageUrl={imageUrl} />
+        </div>
+      );
+    } else if (route === 'signin' || route === 'signout') {
+      displayContent = <Signin loadUser={this.onLoadUser} onRouteChange={this.onRouteChange} />;
+    } else {
+      displayContent = <Register loadUser={this.onLoadUser} onRouteChange={this.onRouteChange} />;
+    }
+  
     return (
       <div className="App">
         <ParticlesComponent />
         <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange} />
-        { route === 'home'
-          ? <div>
-              <Logo />
-              <Rank
-                // name={this.state.user.name}
-                // entries={this.state.user.entries}
-              />
-              <ImageLinkForm
-                onInputChange={this.handleInputChange}
-                onButtonSubmit={this.handleSubmit}
-              />
-              <FaceRecognition box={box} imageUrl={imageUrl}/>
-            </div>
-          : (
-             route === 'signin'
-             ? <Signin loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
-             : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange}/>
-            )
-        }
+        {displayContent}
       </div>
     );
-    // return (
-    //   <div className='App'>
-    //     <Navigation />
-    //     <Logo />
-    //     <Rank />
-    //     <ImageLinkForm onInputChange={this.handleInputChange} onButtonSubmit={this.handleSubmit}/>
-    //     <FaceRecognition box={this.state.box} imageUrl={this.state.imageUrl}/>
-    //     <ParticlesComponent />
-    //   </div>
-    // )
   }
+  
 }
+
 
 export default App
