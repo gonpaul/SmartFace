@@ -9,50 +9,6 @@ import Signin from './components/ Signin/Signin.jsx';
 import Register from './components/Register/Register.jsx';
 import './App.css';
 
-
-const returnClarifaiRequestOptions = (imageUrl) => {
-  // Your PAT (Personal Access Token) can be found in the portal under Authentification
-  const PAT = '6da238062f79428fbe27620e62f739c5';
-  // Specify the correct user_id/app_id pairings
-  // Since you're making inferences outside your app's scope
-  const USER_ID = 'gonpaul';       
-  const APP_ID = 'facerecognition';
-  // Change these to whatever model and image URL you want to use
-  const MODEL_ID = 'face-detection';
-  const IMAGE_URL = imageUrl;
-
-  ///////////////////////////////////////////////////////////////////////////////////
-  // YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
-  ///////////////////////////////////////////////////////////////////////////////////
-
-  const raw = JSON.stringify({
-      "user_app_id": {
-          "user_id": USER_ID,
-          "app_id": APP_ID
-      },
-      "inputs": [
-          {
-              "data": {
-                  "image": {
-                      "url": IMAGE_URL
-                  }
-              }
-          }
-      ]
-  });
-
-  const requestOptions = {
-      method: 'POST',
-      headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Key ' + PAT
-      },
-      body: raw
-  };
-
-  return requestOptions;
-}
-
 const initialState = {
   input: '',
   imageUrl: '',
@@ -68,7 +24,6 @@ const initialState = {
   }
 };
 
-///////////
 class App extends Component {
   constructor() {
     super()
@@ -104,7 +59,7 @@ class App extends Component {
   };
 
   getCoordinates = (response) => {
-    const boundingBox = response.outputs[0].data.regions[0].region_info.bounding_box;
+    const boundingBox = response;
     const image = document.getElementById('inputimage'); //jquery helps me get the width and height of the image
     const width = image.width;
     const height = image.height;
@@ -116,6 +71,7 @@ class App extends Component {
       bottomRow: height - (boundingBox.bottom_row * height)
     }
   }
+
   setBoxArea = (box) => {
     this.setState({ box: box });
   }
@@ -125,26 +81,32 @@ class App extends Component {
     this.setState({ 
       imageUrl: this.state.input,
      })
-    // code to send the input through api key to a service
-    fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", returnClarifaiRequestOptions(this.state.input))
-    .then(response => response.json()) // important line, without it I wouldn't be able to access box coordinatinates
-    .then(response => {
-      if (response) {
-        fetch('http://localhost:3000/image', {
-          method: 'put',
-          headers: { 'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            id: this.state.user.id
-          })
+    // code to send the input to a service using an api key 
+    fetch('http://localhost:3000/imageurl', {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          url: this.state.input
         })
-          .then(response => response.json())
-          .then(count => {
-            this.setState(Object.assign(this.state.user, { entries: count }))
+      })
+      .then(response => response.json()) // important line, without it I wouldn't be able to access box coordinatinates
+      .then(response => {
+        if (response) {
+          fetch('http://localhost:3000/image', {
+            method: 'put',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
           })
-      }
-      this.setBoxArea(this.getCoordinates(response))
-    })
-    .catch(err => console.log(err));
+            .then(response => response.json())
+            .then(count => {
+              this.setState(Object.assign(this.state.user, { entries: count }))
+            })
+        }
+        this.setBoxArea(this.getCoordinates(response))
+      })
+      .catch(err => console.log(err));
   }
 
     // app.models.predict(
