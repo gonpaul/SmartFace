@@ -24,7 +24,7 @@ class Register extends Component {
   }
 
   onAddUser = () => {
-    fetch(port + '/register', {
+    fetch(process.env.BACKEND_URL + '/register', {
       method: 'post',
       headers: { 'Content-Type': 'application/json'},
       body: JSON.stringify({
