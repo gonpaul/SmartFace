@@ -82,7 +82,7 @@ class App extends Component {
       imageUrl: this.state.input,
      })
     // code to send the input to a service using an api key 
-    fetch('http://localhost:3000/imageurl', {
+    fetch(port + '/imageurl', {
         method: 'post',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -92,7 +92,7 @@ class App extends Component {
       .then(response => response.json()) // important line, without it I wouldn't be able to access box coordinatinates
       .then(response => {
         if (response) {
-          fetch('http://localhost:3000/image', {
+          fetch(port + '/image', {
             method: 'put',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify({

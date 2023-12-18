@@ -24,7 +24,7 @@ class Register extends Component {
   }
 
   onAddUser = () => {
-    fetch('http://localhost:3000/register', {
+    fetch(port + '/register', {
       method: 'post',
       headers: { 'Content-Type': 'application/json'},
       body: JSON.stringify({
