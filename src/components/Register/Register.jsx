@@ -24,7 +24,7 @@ class Register extends Component {
   }
 
   onAddUser = () => {
-    fetch(process.env.BACKEND_URL + '/register', {
+    fetch("https://smartface-api-bll3.onrender.com" + '/register', {
       method: 'post',
       headers: { 'Content-Type': 'application/json'},
       body: JSON.stringify({

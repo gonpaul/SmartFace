@@ -20,7 +20,7 @@ class Signin extends Component {
   }
 
   onSubmitSignIn = () => {
-    fetch(process.env.BACKEND_URL + '/signin', {
+    fetch("https://smartface-api-bll3.onrender.com" + '/signin', {
       method: 'post',
       headers: { 'Content-Type': 'application/json'},
       body: JSON.stringify({

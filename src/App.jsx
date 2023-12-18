@@ -82,7 +82,7 @@ class App extends Component {
       imageUrl: this.state.input,
      })
     // code to send the input to a service using an api key 
-    fetch(process.env.BACKEND_URL + '/imageurl', {
+    fetch("https://smartface-api-bll3.onrender.com" + '/imageurl', {
         method: 'post',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -92,7 +92,7 @@ class App extends Component {
       .then(response => response.json()) // important line, without it I wouldn't be able to access box coordinatinates
       .then(response => {
         if (response) {
-          fetch(process.env.BACKEND_URL + '/image', {
+          fetch("https://smartface-api-bll3.onrender.com" + '/image', {
             method: 'put',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify({
